@@ -1,0 +1,23 @@
+---
+
+- name: Clone Podman (conmon) Repo
+  git:
+    repo: https://github.com/containers/libpod/
+    version: v1.5.1
+    dest: "{{podman.buildDir}}/src/github.com/containers/libpod"
+  become_user: "{{ansible_user}}"
+  environment:
+        GOPATH: "{{podman.buildDir}}/"
+
+
+- name: Compile Podman
+  make:
+    chdir: "{{podman.buildDir}}/src/github.com/containers/libpod"
+  register: podman_podman_buildok
+  become_user: "{{ansible_user}}"
+
+- name: Install Podman
+  make:
+    target: install
+    chdir: "{{podman.buildDir}}/src/github.com/containers/libpod"
+  when: podman_podman_buildok

@@ -1,0 +1,4 @@
+---
+
+- import_tasks: install.yml
+  tags: [podman_install]
