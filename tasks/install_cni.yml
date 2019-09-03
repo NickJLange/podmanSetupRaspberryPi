@@ -1,0 +1,123 @@
+---
+
+- name: Install CNI Plugins (conmon)
+  git:
+    repo: https://github.com/containernetworking/plugins.git
+    version: master
+    dest: "{{podman.buildDir}}//src/github.com/containernetworking/plugins"
+  become_user: "{{ansible_user}}"
+  environment:
+        GOPATH: "{{podman.buildDir}}/"
+
+- name: Compile CNI
+  shell: ./build_linux.sh
+  args:
+    executable: /bin/bash
+    chdir: "{{podman.buildDir}}//src/github.com/containernetworking/plugins"
+  environment:
+    GOPATH: "{{podman.buildDir}}/"
+  register: podman_cni_build_ok
+
+- name: "Cookie time "
+  debug:
+    msg: "Mike Check {{podman_cni_build_ok}}"
+
+- name:  Check if CNI bindir "/usr/libexec/cni" exists
+  stat:
+    path: "/usr/libexec/cni"
+  register: podman_libexec_cni
+
+- name: create "/usr/libexec/cni" top-Level
+  file:
+    path: "/usr/libexec/cni"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  when:
+    podman_libexec_cni.stat.exists == False
+
+- name: Get files on remote machine under bin
+  find:
+    paths: "{{podman.buildDir}}//src/github.com/containernetworking/plugins/bin/"
+  register: podman_cni_bin_list
+
+- name: Copy Compiled Binaries
+  copy:
+    src: "{{item.path}}"
+    dest: "/usr/libexec/cni/"
+    owner: root
+    group: root
+    mode: 0755
+    remote_src: yes
+  with_items: "{{ podman_cni_bin_list.files }}"
+  when: podman_cni_build_ok.failed == False
+
+- name: Check if CNI TLD /etc/cni exists
+  stat:
+    path: "/etc/cni"
+  register: podman_etc_cni
+
+- name: create "/etc/cni" top-Level
+  file:
+    path: "/etc/cni"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  when:
+    podman_etc_cni.stat.exists == False
+
+- name:  Check if CNI TLD /etc/cni/net.d exists
+  stat:
+    path: "/etc/cni/net.d"
+  register: podman_etc_netd
+
+- name: create /etc/cni/net.d top-Level
+  file:
+    path: "/etc/cni/net.d"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  when:
+    podman_etc_netd.stat.exists == False
+
+- name: Copy CNI Networking Template into place
+  template:
+    src: "{{ role_path }}/templates/etc/cni/net.d/99-loopback.conf"
+    dest: "/etc/cni/net.d/99-loopback.conf"
+    mode: 0644
+    owner: root
+    group: root
+
+- name:  Check if CNI TLD /etc/containers exists
+  stat:
+    path: "/etc/containers"
+  register: podman_etc_containers
+
+- name: create "/etc/containers" top-Level
+  file:
+    path: "/etc/containers"
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  when:
+    podman_etc_containers.stat.exists == False
+
+- name: Copy Container Registry
+  template:
+    src: "{{ role_path }}/templates/etc/containers/registries.conf"
+    dest: /etc/containers/registries.conf
+    mode: 0644
+    owner: root
+    group: root
+
+- name: Copy container policy
+  template:
+    src: "{{ role_path }}/templates/etc/containers/policy.json"
+    dest: /etc/containers/policy.json
+    mode: 0644
+    owner: root
+    group: root

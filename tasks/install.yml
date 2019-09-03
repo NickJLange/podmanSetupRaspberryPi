@@ -1,0 +1,66 @@
+---
+
+- name: Install requisite packages
+  apt:
+    name:
+      - gcc
+      - make
+      - cmake
+      - git
+      - btrfs-progs
+      - golang-go
+      - go-md2man
+      - iptables
+      - libassuan-dev
+      - libc6-dev
+      - libdevmapper-dev
+      - libglib2.0-dev
+      - libgpgme-dev
+      - libgpg-error-dev
+      - libostree-dev
+      - libprotobuf-dev
+      - libprotobuf-c-dev
+      - libseccomp-dev
+      - libselinux1-dev
+      - libsystemd-dev
+      - pkg-config
+      - runc
+      - uidmap
+      - libapparmor-dev
+    state: present
+    force_apt_get: yes
+  tags:
+    - podman_packages
+  register: podnman_packages_present
+
+
+
+- name: "Check if build directory {{podman.buildDir}} exists"
+  stat:
+    path: "{{podman.buildDir}}/"
+  register: podman_buildDirExists
+
+- name: "create {{podman.buildDir}}/ top-Level"
+  file:
+    path: "{{podman.buildDir}}/"
+    state: directory
+    owner: njl
+    group: njl
+    mode: 0755
+  when:
+    podman_buildDirExists.stat.exists == False
+
+- import_tasks: install_conmon.yml
+  tags: [podman_install_conman]
+
+- import_tasks: install_cni.yml
+  tags: [podman_install_cni]
+
+- import_tasks: install_skopeo.yml
+  tags: [podman_install_skopeo]
+
+- import_tasks: install_buildah.yml
+  tags: [podman_install_buildah]
+
+- import_tasks: install_podman.yml
+  tags: [podman_install_podman]

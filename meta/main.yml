@@ -1,0 +1,15 @@
+---
+
+dependencies: []
+
+galaxy_info:
+  author: Nick Lange
+  company: Private
+  description: Configures Raspberry PI wifi
+  license: MIT
+  platforms:
+  - name: Debian
+    versions:
+    - all
+  categories:
+  - system
