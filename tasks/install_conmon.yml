@@ -4,24 +4,30 @@
   git:
     repo: https://github.com/containers/conmon.git
     version: master
-    dest: "{{podman.buildDir}}/conmon/"
-  become_user: "{{ansible_user}}"
+    dest: "{{ podman.buildDir }}/conmon/"
+  become: yes
+  become_user: "{{ ansible_user }}"
+
 
 
 - name: Compile Connection Monitor (Part 1)
   make:
-    chdir: "{{podman.buildDir}}/conmon"
+    chdir: "{{ podman.buildDir }}/conmon"
   register: podman_conmon_build_ok
+  environment:
+        GOPATH: "{{ podman.buildDir }}/"
+        GOOS: linux
+        GOARCH: arm
 
 - name: Copy Compiled Binaries
   copy:
-    src: "{{podman.buildDir}}/conmon/bin/conmon"
+    src: "{{ podman.buildDir }}/conmon/bin/conmon"
     dest: /usr/local/bin
     owner: root
     group: root
     mode: 0755
     remote_src: yes
-  when: podman_conmon_build_ok.failed == False
+  when: podman_conmon_build_ok.failed == "False"
 
 - name:  Check if CNI bindir "/usr/libexec/podman" exists
   stat:
@@ -36,14 +42,14 @@
     group: root
     mode: 0755
   when:
-    podman_libexec_cni.stat.exists == False
+    podman_libexec_cni.stat.exists == "False"
 
 - name: Copy Compiled Binaries (Part 2)
   copy:
-    src: "{{podman.buildDir}}/conmon/bin/conmon"
+    src: "{{ podman.buildDir }}/conmon/bin/conmon"
     dest: /usr/local/libexec/podman/conmon
     owner: root
     group: root
     mode: 0755
     remote_src: yes
-  when: podman_conmon_build_ok.failed == False
+  when: podman_conmon_build_ok.failed == "False"

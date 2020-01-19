@@ -3,28 +3,33 @@
 - name: Clone Skopeo (conmon) Repo
   git:
     repo: https://github.com/containers/skopeo/
-    version: v0.1.39
-    dest: "{{podman.buildDir}}/src/github.com/containers/skopeo/"
-  become_user: "{{ansible_user}}"
-  environment:
-        GOPATH: "{{podman.buildDir}}/"
+    version: v0.1.40
+    dest: "{{ podman.buildDir }}/src/github.com/containers/skopeo/"
+    update: no
+  become_user: "{{ ansible_user }}"
+  become: yes
+
 
 
 - name: Compile Skopeo
   make:
     target: binary-local
-    chdir: "{{podman.buildDir}}/src/github.com/containers/skopeo/"
+    chdir: "{{ podman.buildDir }}/src/github.com/containers/skopeo/"
   register: podman_skopeo_buildok
-  become_user: "{{ansible_user}}"
-
+  become: yes
+  become_user: "{{ ansible_user }}"
+  environment:
+        GOPATH: "{{ podman.buildDir }}/"
+        GOOS: linux
+        GOARCH: arm
 
 
 - name: Copy Compiled Binaries (Part 2)
   copy:
-    src: "{{podman.buildDir}}/src/github.com/containers/skopeo/skopeo"
+    src: "{{ podman.buildDir }}/src/github.com/containers/skopeo/skopeo"
     dest: /usr/local/bin/skopeo
     owner: root
     group: root
     mode: 0755
     remote_src: yes
-  when:   podman_skopeo_buildok.failed == False
+  when:   podman_skopeo_buildok.failed == "False"
