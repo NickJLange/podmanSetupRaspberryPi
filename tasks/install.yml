@@ -55,16 +55,18 @@
 
 - name: "create {{ podman.buildDir }}/ top-Level"
   file:
-    path: "{{podman.buildDir}}/"
+    path: "{{ podman.buildDir }}/"
     state: directory
     owner: njl
     group: njl
     mode: 0755
   when:
-    podman_buildDirExists.stat.exists == False
+    podman_buildDirExists.stat.exists == "False"
 
 - name: Check if swap enabled
-  shell: swapon --show | wc -l
+  shell: set -o pipefail && swapon --show | wc -l
+  args:
+    executable: /bin/bash
   register: swap_enabled
   tags: podman_install_swapoff
 
@@ -109,7 +111,9 @@
   tags: podman_install_swapoff
 
 - name: Check if swap enabled
-  shell: swapon --show | wc -l
+  shell: set -o pipefail && swapon --show | wc -l
+  args:
+    executable: /bin/bash
   register: swap_disabled
   tags: podman_install_swapoff
 
@@ -124,14 +128,14 @@
 
 - name: "Remove {{ podman.buildDir }}/ top-Level (if instructed) {{ podman_build_cleanup }}"
   file:
-    path: "{{podman.buildDir}}/"
+    path: "{{ podman.buildDir }}/"
     state: absent
     owner: njl
     group: njl
     mode: 0755
 #    recurse: true
   when:
-    podman_buildDirExists.stat.exists == True and podman_build_cleanup == "Yes"
+    podman_buildDirExists.stat.exists == "True" and podman_build_cleanup == "Yes"
   tags:
     - podman_build_cleanup
 

@@ -2,31 +2,33 @@
 
 - name:  Check if repo directory exists
   stat:
-    path: "{{podman.buildDir}}/src/github.com/containers/buildah/"
+    path: "{{ podman.buildDir }}/src/github.com/containers/buildah/"
   register: podman_buildah_repo
 
 - name: Clone Buildah (conmon) Repo
   git:
     repo: https://github.com/containers/buildah.git
     version: v1.12.0
-    dest: "{{podman.buildDir}}/src/github.com/containers/buildah/"
+    dest: "{{ podman.buildDir }}/src/github.com/containers/buildah/"
     update: no
-  become_user: "{{ansible_user}}"
+  become: yes
+  become_user: "{{ ansible_user }}"
   environment:
-        GOPATH: "{{podman.buildDir}}/"
+        GOPATH: "{{ podman.buildDir }}/"
         GOOS: linux
         GOARCH: arm
-  when: podman_buildah_repo.stat.exists == False
+  when: podman_buildah_repo.stat.exists == "False"
 
 
 - name: Compile Buildah
   make:
-    chdir: "{{podman.buildDir}}/src/github.com/containers/buildah/"
+    chdir: "{{ podman.buildDir }}/src/github.com/containers/buildah/"
   register: podman_buildah_buildok
-  become_user: "{{ansible_user}}"
+  become: yes
+  become_user: "{{ ansible_user }}"
 
 - name: Install Buildah
   make:
     target: install
-    chdir: "{{podman.buildDir}}/src/github.com/containers/buildah/"
+    chdir: "{{ podman.buildDir }}/src/github.com/containers/buildah/"
   when: podman_buildah_buildok

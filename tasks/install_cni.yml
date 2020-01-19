@@ -4,26 +4,23 @@
   git:
     repo: https://github.com/containernetworking/plugins.git
     version: master
-    dest: "{{podman.buildDir}}//src/github.com/containernetworking/plugins"
+    dest: "{{ podman.buildDir }}//src/github.com/containernetworking/plugins"
     update: no
-  become_user: "{{ansible_user}}"
+  become: yes
+  become_user: "{{ ansible_user }}"
   environment:
-        GOPATH: "{{podman.buildDir}}/"
+        GOPATH: "{{ podman.buildDir }}/"
 
 - name: Compile CNI
   shell: ./build_linux.sh
   args:
     executable: /bin/bash
-    chdir: "{{podman.buildDir}}//src/github.com/containernetworking/plugins"
+    chdir: "{{ podman.buildDir }}//src/github.com/containernetworking/plugins"
   environment:
-    GOPATH: "{{podman.buildDir}}/"
+    GOPATH: "{{ podman.buildDir }}/"
     GOOS: linux
     GOARCH: arm
   register: podman_cni_build_ok
-
-- name: "Cookie time "
-  debug:
-    msg: "Mike Check {{podman_cni_build_ok}}"
 
 - name:  Check if CNI bindir "/usr/libexec/cni" exists
   stat:
@@ -38,23 +35,23 @@
     group: root
     mode: 0755
   when:
-    podman_libexec_cni.stat.exists == False
+    podman_libexec_cni.stat.exists == "False"
 
 - name: Get files on remote machine under bin
   find:
-    paths: "{{podman.buildDir}}//src/github.com/containernetworking/plugins/bin/"
+    paths: "{{ podman.buildDir }}//src/github.com/containernetworking/plugins/bin/"
   register: podman_cni_bin_list
 
 - name: Copy Compiled Binaries
   copy:
-    src: "{{item.path}}"
+    src: "{{ item.path }}"
     dest: "/usr/libexec/cni/"
     owner: root
     group: root
     mode: 0755
     remote_src: yes
   with_items: "{{ podman_cni_bin_list.files }}"
-  when: podman_cni_build_ok.failed == False
+  when: podman_cni_build_ok.failed == "False"
 
 - name: Check if CNI TLD /etc/cni exists
   stat:
@@ -69,7 +66,7 @@
     group: root
     mode: 0755
   when:
-    podman_etc_cni.stat.exists == False
+    podman_etc_cni.stat.exists == "False"
 
 - name:  Check if CNI TLD /etc/cni/net.d exists
   stat:
@@ -84,7 +81,7 @@
     group: root
     mode: 0755
   when:
-    podman_etc_netd.stat.exists == False
+    podman_etc_netd.stat.exists == "False"
 
 - name: Copy CNI Networking Template into place
   template:
@@ -107,7 +104,7 @@
     group: root
     mode: 0755
   when:
-    podman_etc_containers.stat.exists == False
+    podman_etc_containers.stat.exists == "False"
 
 - name: Copy Container Registry
   template:

@@ -9,3 +9,4 @@ Download, compile and install named-releases of Podman / Buildah and Skopeo for 
 
 ## FIXME
    * (Randomly) Go reports not enough memory to link - manual compilation is fine. Perhaps an ansible'ism
+   * Fix the commands with pipes - there is probably a simpler way to do it without invoking bash (which may or may not be installed?!)
