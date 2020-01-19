@@ -32,4 +32,4 @@
     group: root
     mode: 0755
     remote_src: yes
-  when:   podman_skopeo_buildok.failed == "False"
+  when: not  podman_skopeo_buildok.failed 
