@@ -1,6 +1,6 @@
 ---
 
-- name: Install requisite packages
+- name: Install requisite packages (likely present)
   apt:
     name:
       - gcc
@@ -11,6 +11,20 @@
       - golang-go
       - go-md2man
       - iptables
+      - pkg-config
+      - runc
+      - uidmap
+      - dphys-swapfile
+    state: present
+    force_apt_get: yes
+    cache_valid_time: 2592000
+  tags:
+    - podman_packages
+  register: podman_packages_present
+
+- name: Install requisite dev packages
+  apt:
+    name:
       - libassuan-dev
       - libc6-dev
       - libdevmapper-dev
@@ -23,20 +37,14 @@
       - libseccomp-dev
       - libselinux1-dev
       - libsystemd-dev
-      - pkg-config
-      - runc
-      - uidmap
       - libapparmor-dev
       - libcap-dev
-      - dphys-swapfile
     state: present
     force_apt_get: yes
     cache_valid_time: 2592000
   tags:
     - podman_packages
-  register: podnman_packages_present
-
-
+  register: podman_build_packages_present
 
 - name: "Check if build directory {{ podman.buildDir }} exists"
   stat:
@@ -126,3 +134,29 @@
     podman_buildDirExists.stat.exists == True and podman_build_cleanup == "Yes"
   tags:
     - podman_build_cleanup
+
+
+- name: Uninstall requisite dev packages
+  apt:
+    name:
+      - libassuan-dev
+      - libc6-dev
+      - libdevmapper-dev
+      - libglib2.0-dev
+      - libgpgme-dev
+      - libgpg-error-dev
+      - libostree-dev
+      - libprotobuf-dev
+      - libprotobuf-c-dev
+      - libseccomp-dev
+      - libselinux1-dev
+      - libsystemd-dev
+      - libapparmor-dev
+      - libcap-dev
+    state: absent
+    force_apt_get: yes
+    cache_valid_time: 2592000
+  tags:
+    - podman_build_cleanup
+  register: podman_packages_present
+  when: podman_build_cleanup == "Yes"
