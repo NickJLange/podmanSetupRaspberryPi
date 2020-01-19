@@ -8,11 +8,14 @@
 - name: Clone Buildah (conmon) Repo
   git:
     repo: https://github.com/containers/buildah.git
-    version: v1.10.1
+    version: v1.12.0
     dest: "{{podman.buildDir}}/src/github.com/containers/buildah/"
+    update: no
   become_user: "{{ansible_user}}"
   environment:
         GOPATH: "{{podman.buildDir}}/"
+        GOOS: linux
+        GOARCH: arm
   when: podman_buildah_repo.stat.exists == False
 
 

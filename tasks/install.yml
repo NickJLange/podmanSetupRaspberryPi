@@ -27,20 +27,25 @@
       - runc
       - uidmap
       - libapparmor-dev
+      - libcap-dev
+      - dphys-swapfile
     state: present
     force_apt_get: yes
+    cache_valid_time: 2592000
   tags:
     - podman_packages
   register: podnman_packages_present
 
 
 
-- name: "Check if build directory {{podman.buildDir}} exists"
+- name: "Check if build directory {{ podman.buildDir }} exists"
   stat:
-    path: "{{podman.buildDir}}/"
+    path: "{{ podman.buildDir }}/"
   register: podman_buildDirExists
+  tags:
+    - podman_build_cleanup
 
-- name: "create {{podman.buildDir}}/ top-Level"
+- name: "create {{ podman.buildDir }}/ top-Level"
   file:
     path: "{{podman.buildDir}}/"
     state: directory
@@ -50,17 +55,74 @@
   when:
     podman_buildDirExists.stat.exists == False
 
+- name: Check if swap enabled
+  shell: swapon --show | wc -l
+  register: swap_enabled
+  tags: podman_install_swapoff
+
+- name: Blindly replace swap size (this seems like a bad idea)
+  replace:
+    dest: /etc/dphys-swapfile
+    regexp: '^CONF_SWAPSIZE=.+'
+    replace: "CONF_SWAPSIZE={{ podman_build_swapsize }}"
+    backup: yes
+  register: sysctl
+  tags: podman_install_swapoff
+#  when: swap_enabled.stdout == "0"
+
+- name: Enable swap if not already enabled
+  shell: "{{ item }}"
+  with_items:
+    - dphys-swapfile setup
+    - dphys-swapfile swapon
+  when: swap_enabled.stdout == "0"
+
 - import_tasks: install_conmon.yml
   tags: [podman_install_conman]
 
 - import_tasks: install_cni.yml
   tags: [podman_install_cni]
 
-- import_tasks: install_skopeo.yml
-  tags: [podman_install_skopeo]
-
 - import_tasks: install_buildah.yml
   tags: [podman_install_buildah]
 
+- import_tasks: install_skopeo.yml
+  tags: [podman_install_skopeo]
+
 - import_tasks: install_podman.yml
   tags: [podman_install_podman]
+
+- name: Disable swap if not already enabled
+  shell: "{{ item }}"
+  with_items:
+    - dphys-swapfile swapoff
+    - dphys-swapfile uninstall
+  when: swap_enabled.stdout != "0"
+  tags: podman_install_swapoff
+
+- name: Check if swap enabled
+  shell: swapon --show | wc -l
+  register: swap_disabled
+  tags: podman_install_swapoff
+
+
+- name: Warn if it didn't work...
+  debug:
+    msg: "Swap was not successfully turned off"
+  when: swap_disabled.stdout != "0"
+  tags: podman_install_swapoff
+
+
+
+- name: "Remove {{ podman.buildDir }}/ top-Level (if instructed) {{ podman_build_cleanup }}"
+  file:
+    path: "{{podman.buildDir}}/"
+    state: absent
+    owner: njl
+    group: njl
+    mode: 0755
+#    recurse: true
+  when:
+    podman_buildDirExists.stat.exists == True and podman_build_cleanup == "Yes"
+  tags:
+    - podman_build_cleanup

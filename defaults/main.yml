@@ -2,3 +2,6 @@
 
 podman:
   buildDir: /var/tmp/podmanBuild/
+
+podman_build_cleanup: "No"
+podman_build_swapsize: "512"

@@ -3,11 +3,14 @@
 - name: Clone Skopeo (conmon) Repo
   git:
     repo: https://github.com/containers/skopeo/
-    version: v0.1.39
+    version: v0.1.40
     dest: "{{podman.buildDir}}/src/github.com/containers/skopeo/"
+    update: no
   become_user: "{{ansible_user}}"
   environment:
         GOPATH: "{{podman.buildDir}}/"
+        GOOS: linux
+        GOARCH: arm
 
 
 - name: Compile Skopeo

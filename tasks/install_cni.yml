@@ -5,6 +5,7 @@
     repo: https://github.com/containernetworking/plugins.git
     version: master
     dest: "{{podman.buildDir}}//src/github.com/containernetworking/plugins"
+    update: no
   become_user: "{{ansible_user}}"
   environment:
         GOPATH: "{{podman.buildDir}}/"
@@ -16,6 +17,8 @@
     chdir: "{{podman.buildDir}}//src/github.com/containernetworking/plugins"
   environment:
     GOPATH: "{{podman.buildDir}}/"
+    GOOS: linux
+    GOARCH: arm
   register: podman_cni_build_ok
 
 - name: "Cookie time "

@@ -5,10 +5,12 @@
     repo: https://github.com/containers/libpod/
     version: v1.5.1
     dest: "{{podman.buildDir}}/src/github.com/containers/libpod"
+    update: no
   become_user: "{{ansible_user}}"
   environment:
         GOPATH: "{{podman.buildDir}}/"
-
+        GOOS: linux
+        GOARCH: arm
 
 - name: Compile Podman
   make:
@@ -16,7 +18,9 @@
   register: podman_podman_buildok
   become_user: "{{ansible_user}}"
 
-- name: Install Podman
+
+
+- name: Install Podman [or so it says]
   make:
     target: install
     chdir: "{{podman.buildDir}}/src/github.com/containers/libpod"
