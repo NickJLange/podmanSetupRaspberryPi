@@ -13,12 +13,6 @@
     update: no
   become: yes
   become_user: "{{ ansible_user }}"
-  environment:
-        GOPATH: "{{ podman.buildDir }}/"
-        GOOS: linux
-        GOARCH: arm
-  when: podman_buildah_repo.stat.exists == "False"
-
 
 - name: Compile Buildah
   make:
@@ -26,6 +20,10 @@
   register: podman_buildah_buildok
   become: yes
   become_user: "{{ ansible_user }}"
+  environment:
+        GOPATH: "{{ podman.buildDir }}/"
+        GOOS: linux
+        GOARCH: arm
 
 - name: Install Buildah
   make:

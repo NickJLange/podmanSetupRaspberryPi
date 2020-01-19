@@ -8,10 +8,7 @@
     update: no
   become: yes
   become_user: "{{ ansible_user }}"
-  environment:
-        GOPATH: "{{ podman.buildDir }}/"
-        GOOS: linux
-        GOARCH: arm
+
 
 - name: Compile Podman
   make:
@@ -19,7 +16,10 @@
   register: podman_podman_buildok
   become: yes
   become_user: "{{ ansible_user }}"
-
+  environment:
+        GOPATH: "{{ podman.buildDir }}/"
+        GOOS: linux
+        GOARCH: arm
 
 
 - name: Install Podman [or so it says]

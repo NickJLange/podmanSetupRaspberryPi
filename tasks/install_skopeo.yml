@@ -8,10 +8,7 @@
     update: no
   become_user: "{{ ansible_user }}"
   become: yes
-  environment:
-        GOPATH: "{{ podman.buildDir }}/"
-        GOOS: linux
-        GOARCH: arm
+
 
 
 - name: Compile Skopeo
@@ -21,7 +18,10 @@
   register: podman_skopeo_buildok
   become: yes
   become_user: "{{ ansible_user }}"
-
+  environment:
+        GOPATH: "{{ podman.buildDir }}/"
+        GOOS: linux
+        GOARCH: arm
 
 
 - name: Copy Compiled Binaries (Part 2)
