@@ -27,7 +27,7 @@
     group: root
     mode: 0755
     remote_src: yes
-  when: podman_conmon_build_ok.failed == "False"
+  when: not podman_conmon_build_ok.failed
 
 - name:  Check if CNI bindir "/usr/libexec/podman" exists
   stat:
@@ -42,7 +42,7 @@
     group: root
     mode: 0755
   when:
-    podman_libexec_cni.stat.exists == "False"
+    podman_libexec_cni.stat.exists
 
 - name: Copy Compiled Binaries (Part 2)
   copy:
@@ -52,4 +52,4 @@
     group: root
     mode: 0755
     remote_src: yes
-  when: podman_conmon_build_ok.failed == "False"
+  when: not podman_conmon_build_ok.failed 

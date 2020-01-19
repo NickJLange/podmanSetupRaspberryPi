@@ -61,7 +61,7 @@
     group: njl
     mode: 0755
   when:
-    podman_buildDirExists.stat.exists == "False"
+    podman_buildDirExists.stat.exists
 
 - name: Check if swap enabled
   shell: set -o pipefail && swapon --show | wc -l
@@ -130,12 +130,9 @@
   file:
     path: "{{ podman.buildDir }}/"
     state: absent
-    owner: njl
-    group: njl
     mode: 0755
-#    recurse: true
   when:
-    podman_buildDirExists.stat.exists == "True" and podman_build_cleanup == "Yes"
+    podman_buildDirExists.stat.exists and podman_build_cleanup == "Yes"
   tags:
     - podman_build_cleanup
 

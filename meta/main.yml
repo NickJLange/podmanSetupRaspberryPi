@@ -11,6 +11,6 @@ galaxy_info:
   platforms:
     - name: Debian
       versions:
-        - all
+        - buster
   galaxy_tags:
     - system
