@@ -3,7 +3,7 @@
 - name: Clone Podman (conmon) Repo
   git:
     repo: https://github.com/containers/libpod/
-    version: v1.7.0
+    version: v1.9.3
     dest: "{{ podman.buildDir }}/src/github.com/containers/libpod"
     update: no
   become: yes
