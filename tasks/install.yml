@@ -17,14 +17,17 @@
       - dphys-swapfile
     state: present
     force_apt_get: yes
-    cache_valid_time: 2592000
+    cache_valid_time: 84600
   tags:
     - podman_packages
+    - podman_install_slirp4netns
   register: podman_packages_present
 
 - name: Install requisite dev packages
   apt:
     name:
+      - autogen
+      - autoconf
       - libassuan-dev
       - libc6-dev
       - libdevmapper-dev
@@ -39,11 +42,14 @@
       - libsystemd-dev
       - libapparmor-dev
       - libcap-dev
+      - meson
+      - ninja-build
     state: present
     force_apt_get: yes
-    cache_valid_time: 2592000
+    cache_valid_time: 84600
   tags:
     - podman_packages
+    - podman_install_slirp4netns
   register: podman_build_packages_present
 
 - name: "Check if build directory {{ podman.buildDir }} exists"
@@ -102,6 +108,10 @@
 - import_tasks: install_podman.yml
   tags: [podman_install_podman]
 
+- import_tasks: install_slirp4netns.yml
+  tags: [podman_install_slirp4netns]
+
+
 - name: Disable swap if not already enabled
   shell: "{{ item }}"
   with_items:
@@ -140,6 +150,8 @@
 - name: Uninstall requisite dev packages
   apt:
     name:
+      - autogen
+      - autoconf
       - libassuan-dev
       - libc6-dev
       - libdevmapper-dev
