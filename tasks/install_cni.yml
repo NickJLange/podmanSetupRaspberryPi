@@ -3,7 +3,7 @@
 - name: Install CNI Plugins (conmon)
   git:
     repo: https://github.com/containernetworking/plugins.git
-    version: master
+    version: v0.8.0
     dest: "{{ podman.buildDir }}//src/github.com/containernetworking/plugins"
     update: no
   become: yes
