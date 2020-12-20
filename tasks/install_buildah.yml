@@ -8,7 +8,7 @@
 - name: Clone Buildah (conmon) Repo
   git:
     repo: https://github.com/containers/buildah.git
-    version: v1.14.9
+    version: v1.17.0
     dest: "{{ podman.buildDir }}/src/github.com/containers/buildah/"
     update: no
   become: yes
