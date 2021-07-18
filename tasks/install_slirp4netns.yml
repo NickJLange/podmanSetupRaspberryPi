@@ -1,0 +1,82 @@
+---
+
+- name: Clone libslirp44 (conmon) Repo
+  git:
+    repo: https://gitlab.freedesktop.org/slirp/libslirp.git
+    version: v4.4.0
+    dest: "{{ podman.buildDir }}/src/github.com/rootless-containers/libslirp/"
+    update: no
+  become_user: "{{ ansible_user }}"
+  become: yes
+  tags: podman_install_slirp4netns
+
+- name: build Slirp
+  shell: "meson build"
+  args:
+    chdir: "{{ podman.buildDir }}/src/github.com/rootless-containers/libslirp/"
+  register: podman_libslirp_meson
+  become: yes
+  become_user: "{{ ansible_user }}"
+  tags: podman_build_slirp4netns
+
+- name: install slirp
+  shell: "ninja -C build install"
+  args:
+    chdir: "{{ podman.buildDir }}/src/github.com/rootless-containers/libslirp/"
+  register: podman_install_slirp4netns
+  become: yes
+  tags: podman_install_slirp4netns
+
+- name: Clone Slirp4netns (conmon) Repo
+  git:
+    repo: https://github.com/rootless-containers/slirp4netns
+    version: v1.1.8
+    dest: "{{ podman.buildDir }}/src/github.com/rootless-containers/slirp4netns/"
+    update: no
+  become_user: "{{ ansible_user }}"
+  become: yes
+  tags: podman_install_slirp4netns
+
+- name: Autogen Slirp4netns
+  shell: "./autogen.sh"
+  args:
+    chdir: "{{ podman.buildDir }}/src/github.com/rootless-containers/slirp4netns/"
+  register: podman_slirp4netns_autogenok
+  become: yes
+  become_user: "{{ ansible_user }}"
+  environment:
+        GOPATH: "{{ podman.buildDir }}/"
+        GOOS: linux
+        GOARCH: arm
+  tags: podman_install_slirp4netns
+
+- name: Configure Slirp4netns
+  shell: "./configure --prefix=/usr/local/"
+  args:
+    chdir: "{{ podman.buildDir }}/src/github.com/rootless-containers/slirp4netns/"
+  register: podman_slirp4netns_configureok
+  become: yes
+  become_user: "{{ ansible_user }}"
+  tags: podman_install_slirp4netns
+
+
+- name: Compile Slirp4netns
+  make:
+    target: all
+    chdir: "{{ podman.buildDir }}/src/github.com/rootless-containers/slirp4netns/"
+  register: podman_slirp4netns_buildok
+  become: yes
+  become_user: "{{ ansible_user }}"
+  tags: podman_install_slirp4netns
+
+
+- name: Copy Compiled Binaries (Part 2)
+  copy:
+    src: "{{ podman.buildDir }}/src/github.com/rootless-containers/slirp4netns/slirp4netns"
+    dest: /usr/local/bin/slirp4netns
+    owner: root
+    group: root
+    mode: 0755
+    remote_src: yes
+  when: not  podman_slirp4netns_buildok.failed
+  tags: podman_install_slirp4netns

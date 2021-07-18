@@ -8,6 +8,7 @@
       - cmake
       - git
       - btrfs-progs
+      - golang
       - golang-go
       - go-md2man
       - iptables
@@ -15,6 +16,7 @@
       - runc
       - uidmap
       - dphys-swapfile
+      - fuse-overlayfs
     state: present
     force_apt_get: yes
     cache_valid_time: 84600
@@ -93,6 +95,11 @@
     - dphys-swapfile swapon
   when: swap_enabled.stdout == "0"
 
+
+- import_tasks: install_slirp4netns.yml
+  tags: [podman_install_slirp4netns]
+
+
 - import_tasks: install_conmon.yml
   tags: [podman_install_conman]
 
@@ -107,9 +114,6 @@
 
 - import_tasks: install_podman.yml
   tags: [podman_install_podman]
-
-- import_tasks: install_slirp4netns.yml
-  tags: [podman_install_slirp4netns]
 
 
 - name: Disable swap if not already enabled
