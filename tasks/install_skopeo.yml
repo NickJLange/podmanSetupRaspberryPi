@@ -3,7 +3,7 @@
 - name: Clone Skopeo (conmon) Repo
   git:
     repo: https://github.com/containers/skopeo/
-    version: v1.0.0
+    version: "{{ skopeo_version }}"
     dest: "{{ podman.buildDir }}/src/github.com/containers/skopeo/"
     update: no
   become_user: "{{ ansible_user }}"

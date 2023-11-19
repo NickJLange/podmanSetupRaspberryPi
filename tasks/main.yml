@@ -1,4 +1,10 @@
 ---
 
+### No longer needed
+#- import_tasks: build.yml
+#  tags: [podman_install]
+
 - import_tasks: install.yml
+  tags: [podman_install]
+- import_tasks: configure.yml
   tags: [podman_install]

@@ -3,7 +3,7 @@
 - name: Clone libslirp44 (conmon) Repo
   git:
     repo: https://gitlab.freedesktop.org/slirp/libslirp.git
-    version: v4.4.0
+    version: "{{slirp4netns_version}}"
     dest: "{{ podman.buildDir }}/src/github.com/rootless-containers/libslirp/"
     update: no
   become_user: "{{ ansible_user }}"
@@ -47,7 +47,7 @@
   environment:
         GOPATH: "{{ podman.buildDir }}/"
         GOOS: linux
-        GOARCH: arm
+#        GOARCH: arm
   tags: podman_install_slirp4netns
 
 - name: Configure Slirp4netns

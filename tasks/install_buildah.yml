@@ -8,9 +8,9 @@
 - name: Clone Buildah (conmon) Repo
   git:
     repo: https://github.com/containers/buildah.git
-    version: v1.17.0
+    version: "{{ buildah_version }}"
     dest: "{{ podman.buildDir }}/src/github.com/containers/buildah/"
-    update: no
+    update: yes
   become: yes
   become_user: "{{ ansible_user }}"
 
@@ -23,7 +23,7 @@
   environment:
         GOPATH: "{{ podman.buildDir }}/"
         GOOS: linux
-        GOARCH: arm
+#        GOARCH: arm
 
 - name: Install Buildah
   make:

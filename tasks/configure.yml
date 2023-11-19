@@ -1,0 +1,27 @@
+# log_size_max = -1
+---
+# - block:
+#     - name: Check for Podman in alternate location
+#       stat:
+#         path: "/usr/share/containers/containers.conf"
+#       register: podman_local_ok
+#     - set_fact:
+#         podman_path: "{{ podman_local_path }}"
+#     - fail:
+#         msg: "Podman not installed - do that first"
+#       when: podman_local_ok.stat.exists  != true
+#   when: podman_ok.stat.exists  != true
+
+### FIXME: ??? can this be honored as a separate stanza in /etc/containers...
+- name: Change the max log size
+  lineinfile:
+    dest: /usr/share/containers/containers.conf
+    regexp: ".+log_size_max = .+"
+    line: "log_size_max = 524288000"
+    state: present
+    backrefs: no
+
+- name: Remove legacy config
+  file:
+    path: /etc/containers/libpod.conf
+    state: absent

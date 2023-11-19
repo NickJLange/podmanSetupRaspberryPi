@@ -3,7 +3,7 @@
 - name: Install Connection Monitor (conmon)
   git:
     repo: https://github.com/containers/conmon.git
-    version: v2.0.21
+    version: "{{ conmon_version }}"
     dest: "{{ podman.buildDir }}/conmon/"
   become: yes
   become_user: "{{ ansible_user }}"
@@ -17,7 +17,7 @@
   environment:
         GOPATH: "{{ podman.buildDir }}/"
         GOOS: linux
-        GOARCH: arm
+ #       GOARCH: arm
 
 - name: Copy Compiled Binaries
   copy:
