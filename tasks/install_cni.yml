@@ -3,7 +3,7 @@
 - name: Clone Latest CNI Plugins (conmon)
   git:
     repo: https://github.com/containernetworking/plugins.git
-    version: v1.0.0-rc1
+    version: "{{ cni_version }}"
     dest: "{{ podman.buildDir }}//src/github.com/containernetworking/plugins"
     update: yes
   become: yes
@@ -19,7 +19,7 @@
   environment:
     GOPATH: "{{ podman.buildDir }}/"
     GOOS: linux
-    GOARCH: arm
+#    GOARCH: arm
   register: podman_cni_build_ok
 
 - debug:

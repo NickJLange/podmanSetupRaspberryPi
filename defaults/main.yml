@@ -5,3 +5,11 @@ podman:
 
 podman_build_cleanup: "No"
 podman_build_swapsize: "512"
+
+podman_version: "v4.1.1"
+skopeo_version: "v1.8.0"
+buildah_version: "v1.26.1"
+
+slirp4netns_version: "v1.2.0"
+conmon_version: "v2.1.2"
+cni_version: "v1.1.1"
